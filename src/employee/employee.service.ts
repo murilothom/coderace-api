@@ -63,9 +63,13 @@ export class EmployeeService {
   }
 
   async findAll(currentUser: UserPayload): Promise<EmployeeDto[]> {
-    await this.validatePermissionAndGetEnterpriseId(currentUser.sub);
+    const enterpriseId = await this.validatePermissionAndGetEnterpriseId(
+      currentUser.sub,
+    );
 
-    const employees = await this.employeeModel.find();
+    const employees = await this.employeeModel.find({
+      enterpriseId,
+    });
 
     return employees.map(
       (employee) =>

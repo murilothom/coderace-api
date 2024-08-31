@@ -11,6 +11,7 @@ import { AuthService } from './auth.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { EmployeeSchema } from '../employee/schemas/employee.schema';
 import { EnterpriseSchema } from '../enterprise/schemas/enterprise.schema';
+import { CodeSchema } from './schema/code.schema';
 
 @Module({
   imports: [
@@ -22,6 +23,10 @@ import { EnterpriseSchema } from '../enterprise/schemas/enterprise.schema';
       {
         name: 'Enterprise',
         schema: EnterpriseSchema,
+      },
+      {
+        name: 'Code',
+        schema: CodeSchema,
       },
     ]),
     JwtModule.registerAsync({

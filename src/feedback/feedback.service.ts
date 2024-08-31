@@ -11,6 +11,13 @@ import { Feedback } from './schemas/feedback.schema';
 import { CreateFeedbackDto } from './dto/create-feedback-dto';
 import { Enterprise } from '../enterprise/schemas/enterprise.schema';
 import { FeedbackDto } from './dto/feedback-dto';
+import { QuestionDto } from './dto/question-dto';
+import { Question } from './schemas/question.schema';
+import {
+  getThreeRandomQuestions,
+  questionsAfterWorkObjects,
+  questionsBeforeWorkObjects,
+} from './utils/questions';
 
 @Injectable()
 export class FeedbackService {
@@ -19,25 +26,51 @@ export class FeedbackService {
     private readonly employeeModel: Model<Employee>,
     @InjectModel(Enterprise.name)
     private readonly enterpriseModel: Model<Enterprise>,
+    @InjectModel(Question.name)
+    private readonly questionModel: Model<Question>,
     @InjectModel(Feedback.name)
     private readonly feedbackModel: Model<Feedback>,
-  ) {}
+  ) {
+    this.populateQuestions();
+  }
 
-  async getAll(currentUser: UserPayload): Promise<FeedbackDto[]> {
-    const enterpriseId = await this.validatePermissionAndGetEnterpriseId(
-      currentUser.sub,
-    );
+  private async populateQuestions() {
+    const questions = await this.questionModel.find();
 
-    const feedbacks = await this.feedbackModel.find({
-      enterpriseId,
-    });
-
-    if (!feedbacks?.length) {
-      return [];
+    if (questions.length) {
+      return;
     }
-    // TODO: Enviar dados para a IA
 
-    return [];
+    await this.questionModel.insertMany([
+      ...questionsAfterWorkObjects,
+      ...questionsBeforeWorkObjects,
+    ]);
+  }
+
+  async getRandomQuestions(): Promise<QuestionDto[]> {
+    const start = await this.questionModel
+      .find({ journey: 'inicio' })
+      .then((lst) =>
+        lst.map((x) => ({
+          id: x.id,
+          question: x.question,
+          journey: x.journey,
+        })),
+      );
+    const final = await this.questionModel
+      .find({ journey: 'fim' })
+      .then((lst) =>
+        lst.map((x) => ({
+          id: x.id,
+          question: x.question,
+          journey: x.journey,
+        })),
+      );
+
+    const startQuestions = getThreeRandomQuestions(start);
+    const finalQuestions = getThreeRandomQuestions(final);
+
+    return [...startQuestions, ...finalQuestions];
   }
 
   async create(
@@ -55,8 +88,7 @@ export class FeedbackService {
     await this.feedbackModel.create({
       enterpriseId: employee.enterpriseId,
       sector: employee.sector,
-      rating: dto.rating,
-      comment: dto.comment,
+      answers: dto.answers,
     });
   }
 

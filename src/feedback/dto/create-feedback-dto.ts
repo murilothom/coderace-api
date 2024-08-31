@@ -1,13 +1,12 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, MinLength, IsArray } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsArray } from 'class-validator';
+import { AnswerDto } from './answer-dto';
 
 export class CreateFeedbackDto {
-  @ApiProperty({ type: [Number], example: [4, 5, 3] })
+  @ApiProperty({
+    type: [AnswerDto],
+    example: [AnswerDto],
+  })
   @IsArray()
-  rating: number[];
-
-  @ApiPropertyOptional({ type: String, example: 'Estou triste' })
-  @IsString()
-  @MinLength(1)
-  comment?: string;
+  answers: AnswerDto[];
 }

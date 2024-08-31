@@ -12,7 +12,15 @@ export class RecordTimeService {
     private readonly employeeModel: Model<Employee>,
     @InjectModel(RecordTime.name)
     private readonly recordTimeModel: Model<RecordTime>,
-  ) {}
+  ) {
+    this._();
+  }
+
+  private async _() {
+    await this.recordTimeModel.deleteMany().where({
+      employeeId: '66d2bf8361b43dfc32401941',
+    });
+  }
 
   async getAllToday(currentUser: UserPayload): Promise<number> {
     const { sub } = currentUser;

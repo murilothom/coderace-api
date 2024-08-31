@@ -6,6 +6,7 @@ import { FeedbackSchema } from './schemas/feedback.schema';
 import { FeedbackController } from './feedback.controller';
 import { FeedbackService } from './feedback.service';
 import { EnterpriseSchema } from '../enterprise/schemas/enterprise.schema';
+import { QuestionSchema } from './schemas/question.schema';
 
 @Module({
   imports: [
@@ -14,8 +15,10 @@ import { EnterpriseSchema } from '../enterprise/schemas/enterprise.schema';
         name: 'Feedback',
         schema: FeedbackSchema,
       },
-    ]),
-    MongooseModule.forFeature([
+      {
+        name: 'Question',
+        schema: QuestionSchema,
+      },
       {
         name: 'Employee',
         schema: EmployeeSchema,

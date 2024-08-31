@@ -48,14 +48,13 @@ export class RecordTimeService {
       throw new NotFoundException('Colaborador não existe.');
     }
 
-    // TODO: descomentar
-    // const recordTimesTodays = await this.recordTimeModel.find({
-    //   employeeId: sub,
-    //   createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) },
-    // });
-    // if (recordTimesTodays.length === 4) {
-    //   throw new NotFoundException('Colaborador já registrou seus pontos hoje.');
-    // }
+    const recordTimesTodays = await this.recordTimeModel.find({
+      employeeId: sub,
+      createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+    });
+    if (recordTimesTodays.length >= 4) {
+      throw new NotFoundException('Colaborador já registrou seus pontos hoje.');
+    }
 
     await this.recordTimeModel.create({
       employeeId: sub,

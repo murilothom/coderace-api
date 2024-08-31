@@ -13,6 +13,7 @@ export class RecordTimeController {
   @HttpCode(200)
   @ApiResponse({
     status: 200,
+    type: Number,
     description: 'Obter pontos de hoje',
   })
   getAllToday(@CurrentUser() currentUser: UserPayload): Promise<number> {
@@ -23,6 +24,7 @@ export class RecordTimeController {
   @HttpCode(201)
   @ApiResponse({
     status: 201,
+
     description: 'Registro de ponto',
   })
   register(@CurrentUser() currentUser: UserPayload): Promise<void> {

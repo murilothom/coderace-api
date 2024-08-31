@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { EmployeeModule } from './employee/employee.module';
 import { EnterpriseModule } from './enterprise/enterprise.module';
 import { RegisterTimeModule } from './record-time/record-time.module';
+import { FeedbackModule } from './feedback/feedback.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { RegisterTimeModule } from './record-time/record-time.module';
     EmployeeModule,
     EnterpriseModule,
     RegisterTimeModule,
+    FeedbackModule,
     AuthModule,
     EnvModule,
   ],

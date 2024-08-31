@@ -24,7 +24,6 @@ async function bootstrap() {
 
   const origin =
     envMode === 'production' ? 'https://app.empsolucoes.site' : '*';
-
   app.enableCors({
     origin,
     methods: 'GET,POST,PATCH,PUT,DELETE,OPTIONS',

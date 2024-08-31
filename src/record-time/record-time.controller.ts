@@ -24,7 +24,6 @@ export class RecordTimeController {
   @HttpCode(201)
   @ApiResponse({
     status: 201,
-
     description: 'Registro de ponto',
   })
   register(@CurrentUser() currentUser: UserPayload): Promise<void> {

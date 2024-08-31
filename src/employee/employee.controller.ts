@@ -16,8 +16,8 @@ import { CurrentUser } from '../auth/current-user-decorator';
 import { UserPayload } from '../auth/jtw.strategy';
 import { UpdateEmployeeDto } from './dto/update-employee-dto';
 
-@Controller('funcionario')
-@ApiTags('funcionario')
+@Controller('colaborador')
+@ApiTags('colaborador')
 export class EmployeeController {
   constructor(private employeeService: EmployeeService) {}
 

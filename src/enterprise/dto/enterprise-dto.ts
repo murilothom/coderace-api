@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsEmail, MinLength, IsMongoId } from 'class-validator';
+import { IsString, MinLength, IsMongoId } from 'class-validator';
 
 export class EnterpriseDto {
   @ApiProperty({ type: String, example: '66ce7893156b20008c06e1b1' })
@@ -13,10 +13,6 @@ export class EnterpriseDto {
 
   @ApiProperty({ type: String, example: '128931298389' })
   @IsString()
-  @MinLength(1)
+  @MinLength(14)
   document: string;
-
-  @ApiProperty({ type: String, example: 'fulano@email.com' })
-  @IsEmail()
-  email: string;
 }

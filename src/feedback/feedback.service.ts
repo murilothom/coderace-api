@@ -63,17 +63,15 @@ export class FeedbackService {
   private async validatePermissionAndGetEnterpriseId(
     id: string,
   ): Promise<string> {
-    const employee = await this.employeeModel.findOne({
-      _id: id,
-      role: Role.ADMIN,
-    });
+    const employee = await this.employeeModel.findById(id);
 
-    const enterprise = await this.enterpriseModel.findById(id);
-
-    if (!employee?.toObject() && !enterprise?.toObject()) {
+    if (
+      !employee?.toObject() ||
+      (employee.role !== Role.ADMIN && employee.role !== Role.OWNER)
+    ) {
       throw new ForbiddenException('Sem permissão.');
     }
 
-    return employee?.enterpriseId || enterprise?.id;
+    return employee.enterpriseId;
   }
 }

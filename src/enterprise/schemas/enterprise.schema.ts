@@ -9,13 +9,7 @@ export class Enterprise extends Document {
   name: string;
 
   @Prop({ type: String, required: true, unique: true })
-  email: string;
-
-  @Prop({ type: String, required: true, unique: true })
   document: string;
-
-  @Prop({ type: String, required: true })
-  passwordHash: string;
 
   createdAt: Date;
   updatedAt: Date;

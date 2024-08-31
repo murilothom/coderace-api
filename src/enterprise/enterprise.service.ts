@@ -11,7 +11,7 @@ import { UserPayload } from '../auth/jtw.strategy';
 import { Enterprise } from './schemas/enterprise.schema';
 import { EnterpriseDto } from './dto/enterprise-dto';
 import { hash } from 'bcryptjs';
-import { Employee } from '../employee/schemas/employee.schema';
+import { Employee, Role } from '../employee/schemas/employee.schema';
 
 @Injectable()
 export class EnterpriseService {
@@ -25,7 +25,15 @@ export class EnterpriseService {
   async getCurrentEnterprise(currentUser: UserPayload): Promise<EnterpriseDto> {
     const { sub } = currentUser;
 
-    const enterprise = await this.enterpriseModel.findById(sub);
+    const employee = await this.employeeModel.findById(sub);
+
+    if (!employee?.toObject()) {
+      throw new NotFoundException('Colaborador não existe.');
+    }
+
+    const enterprise = await this.enterpriseModel.findById(
+      employee?.enterpriseId,
+    );
 
     if (!enterprise) {
       throw new NotFoundException('Empresa não existe.');
@@ -34,21 +42,33 @@ export class EnterpriseService {
     return {
       id: enterprise.id,
       name: enterprise.name,
-      email: enterprise.email,
       document: enterprise.document,
     };
   }
 
   async create(dto: CreateEnterpriseDto): Promise<void> {
-    const { name, email, document, confirmPassword, password } = dto;
+    const { enterpriseName, name, email, document, confirmPassword, password } =
+      dto;
 
-    const enterpriseWithSameEmail = await this.enterpriseModel.findOne().where({
+    const enterpriseWithSameDocument = await this.enterpriseModel
+      .findOne()
+      .where({
+        document: dto.document,
+      });
+
+    if (enterpriseWithSameDocument?.toObject()) {
+      throw new ConflictException(
+        'Já existe uma empresa cadastrado com este documento.',
+      );
+    }
+
+    const employeeWithSameEmail = await this.employeeModel.findOne().where({
       email: dto.email,
     });
 
-    if (enterpriseWithSameEmail?.toObject()) {
+    if (employeeWithSameEmail?.toObject()) {
       throw new ConflictException(
-        'Já existe uma empresa cadastrado com este e-mail.',
+        'Já existe um colaborador cadastrado com este e-mail.',
       );
     }
 
@@ -58,11 +78,20 @@ export class EnterpriseService {
 
     const passwordHash = await hash(password, 6);
 
-    await this.enterpriseModel.create({
-      name,
+    const enterprise = await this.enterpriseModel.create({
+      name: enterpriseName,
       email,
       passwordHash,
       document,
+    });
+
+    await this.employeeModel.create({
+      name,
+      email,
+      passwordHash,
+      sector: 'Dono',
+      role: Role.OWNER,
+      enterpriseId: enterprise.id,
     });
   }
 }

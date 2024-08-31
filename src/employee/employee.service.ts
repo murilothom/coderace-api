@@ -34,8 +34,6 @@ export class EmployeeService {
   }
 
   private async populateUserAdmin() {
-    const passwordHash = await hash('123456', 6);
-
     let enterprise = await this.enterpriseModel.findOne({
       name: 'Coderace',
     });
@@ -43,8 +41,6 @@ export class EmployeeService {
     if (!enterprise?.toObject()) {
       enterprise = await this.enterpriseModel.create({
         name: 'Coderace',
-        email: 'admin@coderace.com',
-        passwordHash,
         document: '1234567890',
       });
     }
@@ -54,12 +50,13 @@ export class EmployeeService {
     });
 
     if (!userAdmin?.toObject()) {
+      const passwordHash = await hash('123456', 6);
       await this.employeeModel.create({
         name: 'Murilo',
         email: 'murilo@admin.com',
         passwordHash,
-        role: Role.ADMIN,
-        sector: 'Development',
+        role: Role.OWNER,
+        sector: 'Dono',
         enterpriseId: enterprise.id,
       });
     }
@@ -116,7 +113,7 @@ export class EmployeeService {
       name: employee.name,
       email: employee.email,
       role: employee.role,
-      sector: employee.role,
+      sector: employee.sector,
     };
   }
 
@@ -136,14 +133,12 @@ export class EmployeeService {
 
     if (employeeWithSameEmail?.toObject()) {
       throw new ConflictException(
-        'Já existe um Colaborador cadastrado com este e-mail.',
+        'Já existe um colaborador cadastrado com este e-mail.',
       );
     }
 
     const password = this.generatePassword();
     const passwordHash = await hash(password, 6);
-
-    console.log(password);
 
     await this.employeeModel.create({
       name,
@@ -180,9 +175,9 @@ export class EmployeeService {
 
     const { name, email, role, sector } = dto;
 
-    const user = await this.employeeModel.findById(id);
+    const employee = await this.employeeModel.findById(id);
 
-    if (!user?.toObject()) {
+    if (!employee?.toObject()) {
       throw new ConflictException('Colaborador não existe.');
     }
 
@@ -222,18 +217,16 @@ export class EmployeeService {
   private async validatePermissionAndGetEnterpriseId(
     id: string,
   ): Promise<string> {
-    const employee = await this.employeeModel.findOne({
-      _id: id,
-      role: Role.ADMIN,
-    });
+    const employee = await this.employeeModel.findById(id);
 
-    const enterprise = await this.enterpriseModel.findById(id);
-
-    if (!employee?.toObject() && !enterprise?.toObject()) {
+    if (
+      !employee?.toObject() ||
+      (employee.role !== Role.ADMIN && employee.role !== Role.OWNER)
+    ) {
       throw new ForbiddenException('Sem permissão.');
     }
 
-    return employee?.enterpriseId || enterprise?.id;
+    return employee.enterpriseId;
   }
 
   private generatePassword(): string {

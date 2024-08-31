@@ -16,6 +16,9 @@ export class Enterprise extends Document {
 
   @Prop({ type: String, required: true })
   passwordHash: string;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const EnterpriseSchema = SchemaFactory.createForClass(Enterprise);

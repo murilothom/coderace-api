@@ -6,6 +6,7 @@ import { envSchema } from './env/env';
 import { AuthModule } from './auth/auth.module';
 import { EmployeeModule } from './employee/employee.module';
 import { EnterpriseModule } from './enterprise/enterprise.module';
+import { RegisterTimeModule } from './record-time/record-time.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { EnterpriseModule } from './enterprise/enterprise.module';
     }),
     EmployeeModule,
     EnterpriseModule,
+    RegisterTimeModule,
     AuthModule,
     EnvModule,
   ],

@@ -27,6 +27,9 @@ export class Employee extends Document {
 
   @Prop({ type: String, required: true })
   enterpriseId: string;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const EmployeeSchema = SchemaFactory.createForClass(Employee);

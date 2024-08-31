@@ -7,6 +7,7 @@ import { EmployeeSchema } from './schemas/employee.schema';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EnvService } from '../env/env.service';
+import { EnterpriseSchema } from '../enterprise/schemas/enterprise.schema';
 
 @Module({
   imports: [
@@ -14,6 +15,10 @@ import { EnvService } from '../env/env.service';
       {
         name: 'Employee',
         schema: EmployeeSchema,
+      },
+      {
+        name: 'Enterprise',
+        schema: EnterpriseSchema,
       },
     ]),
     MailerModule.forRootAsync({

@@ -24,6 +24,9 @@ export class Employee extends Document {
 
   @Prop({ enum: Role, required: true })
   role: Role;
+
+  @Prop({ type: String, required: true })
+  enterpriseId: string;
 }
 
 export const EmployeeSchema = SchemaFactory.createForClass(Employee);

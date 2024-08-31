@@ -16,7 +16,7 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     type: AuthenticateUserDto,
-    description: 'Autenticação de Colaborador',
+    description: 'Autenticação',
   })
   authenticate(@Body() dto: LoginDto): Promise<AuthenticateUserDto> {
     return this.authService.authenticate(dto);

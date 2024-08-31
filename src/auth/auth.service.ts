@@ -8,6 +8,7 @@ import { LoginDto } from './dto/login-dto';
 import * as dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 import { Employee } from '../employee/schemas/employee.schema';
+import { Enterprise } from '../enterprise/schemas/enterprise.schema';
 dayjs.locale('pt-br');
 
 @Injectable()
@@ -15,6 +16,8 @@ export class AuthService {
   constructor(
     @InjectModel(Employee.name)
     private readonly employeeModel: Model<Employee>,
+    @InjectModel(Enterprise.name)
+    private readonly enterpriseModel: Model<Enterprise>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -25,17 +28,25 @@ export class AuthService {
       email,
     });
 
-    if (!employee?.toObject()) {
+    const enterprise = await this.enterpriseModel.findOne().where({
+      email,
+    });
+
+    if (!employee?.toObject() && !enterprise?.toObject()) {
       throw new ConflictException('Credenciais inválidas.');
     }
 
-    const isPasswordValid = await compare(password, employee.passwordHash);
+    const hashed = employee?.passwordHash || enterprise?.passwordHash || '';
+
+    const isPasswordValid = await compare(password, hashed);
 
     if (!isPasswordValid) {
       throw new ConflictException('Credenciais inválidas.');
     }
 
-    const accessToken = await this.jwtService.signAsync({ sub: employee.id });
+    const id = employee?.id || enterprise?.id;
+
+    const accessToken = await this.jwtService.signAsync({ sub: id });
 
     return {
       access_token: accessToken,

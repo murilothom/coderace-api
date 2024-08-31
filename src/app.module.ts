@@ -5,6 +5,7 @@ import { EnvModule } from './env/env.module';
 import { envSchema } from './env/env';
 import { AuthModule } from './auth/auth.module';
 import { EmployeeModule } from './employee/employee.module';
+import { EnterpriseModule } from './enterprise/enterprise.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { EmployeeModule } from './employee/employee.module';
       inject: [ConfigService],
     }),
     EmployeeModule,
+    EnterpriseModule,
     AuthModule,
     EnvModule,
   ],

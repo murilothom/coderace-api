@@ -14,6 +14,7 @@ import { hash } from 'bcryptjs';
 import { UpdateEmployeeDto } from './dto/update-employee-dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { EnvService } from '../env/env.service';
+import { Enterprise } from '../enterprise/schemas/enterprise.schema';
 
 @Injectable()
 export class EmployeeService {
@@ -22,6 +23,8 @@ export class EmployeeService {
   constructor(
     @InjectModel(Employee.name)
     private readonly employeeModel: Model<Employee>,
+    @InjectModel(Enterprise.name)
+    private readonly enterpriseModel: Model<Enterprise>,
     private readonly mailerService: MailerService,
     private readonly envService: EnvService,
   ) {
@@ -31,26 +34,39 @@ export class EmployeeService {
   }
 
   private async populateUserAdmin() {
+    const passwordHash = await hash('123456', 6);
+
+    let enterprise = await this.enterpriseModel.findOne({
+      name: 'Coderace',
+    });
+
+    if (!enterprise?.toObject()) {
+      enterprise = await this.enterpriseModel.create({
+        name: 'Coderace',
+        email: 'admin@coderace.com',
+        passwordHash,
+        document: '1234567890',
+      });
+    }
+
     const userAdmin = await this.employeeModel.findOne({
       email: 'murilo@admin.com',
     });
 
-    if (userAdmin?.toObject()) {
-      return;
+    if (!userAdmin?.toObject()) {
+      await this.employeeModel.create({
+        name: 'Murilo',
+        email: 'murilo@admin.com',
+        passwordHash,
+        role: Role.ADMIN,
+        sector: 'Development',
+        enterpriseId: enterprise.id,
+      });
     }
-
-    const passwordHash = await hash('123456', 6);
-    await this.employeeModel.create({
-      name: 'Murilo',
-      email: 'murilo@admin.com',
-      passwordHash,
-      role: Role.ADMIN,
-      sector: 'Development',
-    });
   }
 
   async findAll(currentUser: UserPayload): Promise<EmployeeDto[]> {
-    await this.validateAndGetEmployeeAdmin(currentUser.sub);
+    await this.validatePermissionAndGetEnterpriseId(currentUser.sub);
 
     const employees = await this.employeeModel.find();
 
@@ -69,7 +85,7 @@ export class EmployeeService {
   async getById(id: string, currentUser: UserPayload): Promise<EmployeeDto> {
     const { sub } = currentUser;
 
-    await this.validateAndGetEmployeeAdmin(sub);
+    await this.validatePermissionAndGetEnterpriseId(sub);
 
     const employee = await this.employeeModel.findById(id);
 
@@ -108,7 +124,9 @@ export class EmployeeService {
     dto: CreateEmployeeDto,
     currentUser: UserPayload,
   ): Promise<void> {
-    await this.validateAndGetEmployeeAdmin(currentUser.sub);
+    const enterpriseId = await this.validatePermissionAndGetEnterpriseId(
+      currentUser.sub,
+    );
 
     const { name, email, role, sector } = dto;
 
@@ -125,12 +143,15 @@ export class EmployeeService {
     const password = this.generatePassword();
     const passwordHash = await hash(password, 6);
 
+    console.log(password);
+
     await this.employeeModel.create({
       name,
       email,
       passwordHash,
       role,
       sector,
+      enterpriseId,
     });
 
     const link = `${this.frontendURL}/entrar`;
@@ -155,7 +176,7 @@ export class EmployeeService {
     dto: UpdateEmployeeDto,
     currentUser: UserPayload,
   ): Promise<void> {
-    await this.validateAndGetEmployeeAdmin(currentUser.sub);
+    await this.validatePermissionAndGetEnterpriseId(currentUser.sub);
 
     const { name, email, role, sector } = dto;
 
@@ -185,7 +206,7 @@ export class EmployeeService {
   }
 
   async delete(id: string, currentUser: UserPayload): Promise<void> {
-    await this.validateAndGetEmployeeAdmin(currentUser.sub);
+    await this.validatePermissionAndGetEnterpriseId(currentUser.sub);
 
     const employee = await this.employeeModel.findById(id);
 
@@ -198,18 +219,21 @@ export class EmployeeService {
     });
   }
 
-  private async validateAndGetEmployeeAdmin(id: string): Promise<Employee> {
-    // TODO: Validar se quem ta fazendo a requisicao é uma empresa
+  private async validatePermissionAndGetEnterpriseId(
+    id: string,
+  ): Promise<string> {
     const employee = await this.employeeModel.findOne({
       _id: id,
       role: Role.ADMIN,
     });
 
-    if (!employee?.toObject()) {
+    const enterprise = await this.enterpriseModel.findById(id);
+
+    if (!employee?.toObject() && !enterprise?.toObject()) {
       throw new ForbiddenException('Sem permissão.');
     }
 
-    return employee;
+    return employee?.enterpriseId || enterprise?.id;
   }
 
   private generatePassword(): string {

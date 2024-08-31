@@ -47,8 +47,15 @@ export class EnterpriseService {
   }
 
   async create(dto: CreateEnterpriseDto): Promise<void> {
-    const { enterpriseName, name, email, document, confirmPassword, password } =
-      dto;
+    const {
+      enterpriseName,
+      name,
+      email,
+      document,
+      confirmPassword,
+      password,
+      sector,
+    } = dto;
 
     const enterpriseWithSameDocument = await this.enterpriseModel
       .findOne()
@@ -89,7 +96,7 @@ export class EnterpriseService {
       name,
       email,
       passwordHash,
-      sector: 'Dono',
+      sector,
       role: Role.OWNER,
       enterpriseId: enterprise.id,
     });

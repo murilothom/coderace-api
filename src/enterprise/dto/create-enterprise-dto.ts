@@ -17,6 +17,11 @@ export class CreateEnterpriseDto {
   @MinLength(1)
   name: string;
 
+  @ApiProperty({ type: String, example: 'Desenvolvimento' })
+  @IsString()
+  @MinLength(1)
+  sector: string;
+
   @ApiProperty({ type: String, example: 'fulano@coderace.com' })
   @IsEmail()
   email: string;

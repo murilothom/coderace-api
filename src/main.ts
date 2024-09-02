@@ -20,13 +20,9 @@ async function bootstrap() {
   const envService = app.get(EnvService);
   const port = envService.get('PORT');
 
-  const envMode = envService.get('NODE_ENV');
-
-  const origin =
-    envMode === 'production' ? 'https://app.empsolucoes.site' : '*';
   app.enableCors({
-    origin,
-    methods: 'GET,POST,PATCH,PUT,DELETE,OPTIONS',
+    origin: '*',
+    methods: 'GET,POST,PATCH,PUT,DELETE',
     allowedHeaders: '*',
     credentials: true,
   });

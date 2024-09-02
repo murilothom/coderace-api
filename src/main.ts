@@ -20,9 +20,13 @@ async function bootstrap() {
   const envService = app.get(EnvService);
   const port = envService.get('PORT');
 
+  const envMode = envService.get('NODE_ENV');
+
+  const origin =
+    envMode === 'production' ? 'https://coderace-web.vercel.app' : '*';
   app.enableCors({
-    origin: '*',
-    methods: 'GET,POST,PATCH,PUT,DELETE',
+    origin,
+    methods: 'GET,POST,PATCH,PUT,DELETE,OPTIONS',
     allowedHeaders: '*',
     credentials: true,
   });

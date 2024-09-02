@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import { Enterprise } from './schemas/enterprise.schema';
 import { EnterpriseDto } from './dto/enterprise-dto';
 import { hash } from 'bcryptjs';
 import { Employee, Role } from '../employee/schemas/employee.schema';
+import { SectorDto } from './dto/sector-dto';
 
 @Injectable()
 export class EnterpriseService {
@@ -44,6 +46,42 @@ export class EnterpriseService {
       name: enterprise.name,
       document: enterprise.document,
     };
+  }
+
+  async getEnterpriseSectors(currentUser: UserPayload): Promise<SectorDto[]> {
+    const { sub } = currentUser;
+
+    const employee = await this.employeeModel.findById(sub);
+
+    if (
+      !employee?.toObject() ||
+      (employee.role !== Role.ADMIN && employee.role !== Role.OWNER)
+    ) {
+      throw new ForbiddenException('Sem permissão.');
+    }
+
+    const enterprise = await this.enterpriseModel.findById(
+      employee.enterpriseId,
+    );
+
+    if (!enterprise?.toObject()) {
+      throw new ForbiddenException('Sem permissão.');
+    }
+
+    const employees = await this.employeeModel.find({
+      enterpriseId: enterprise?.id,
+    });
+
+    const allSectors: string[] = [];
+    employees.forEach((employee) => {
+      allSectors.push(employee.sector);
+    });
+
+    const sectors = new Set(allSectors);
+
+    return Array.from(sectors).map((sector) => ({
+      sector,
+    }));
   }
 
   async create(dto: CreateEnterpriseDto): Promise<void> {

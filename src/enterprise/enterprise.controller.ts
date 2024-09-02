@@ -6,6 +6,7 @@ import { CurrentUser } from '../auth/current-user-decorator';
 import { UserPayload } from '../auth/jtw.strategy';
 import { EnterpriseService } from './enterprise.service';
 import { Public } from '../auth/public';
+import { SectorDto } from './dto/sector-dto';
 
 @Controller('empresa')
 @ApiTags('empresa')
@@ -22,6 +23,16 @@ export class EnterpriseController {
     @CurrentUser() currentUser: UserPayload,
   ): Promise<EnterpriseDto> {
     return this.enterpriseService.getCurrentEnterprise(currentUser);
+  }
+
+  @Get('setores')
+  @ApiResponse({
+    status: 200,
+  })
+  getEnterpriseSectors(
+    @CurrentUser() currentUser: UserPayload,
+  ): Promise<SectorDto[]> {
+    return this.enterpriseService.getEnterpriseSectors(currentUser);
   }
 
   @Public()

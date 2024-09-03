@@ -29,39 +29,7 @@ export class EmployeeService {
     private readonly envService: EnvService,
   ) {
     this.frontendURL = this.envService.get('FRONTEND_URL');
-
-    this.populateUserAdmin();
   }
-
-  private async populateUserAdmin() {
-    let enterprise = await this.enterpriseModel.findOne({
-      name: 'Coderace',
-    });
-
-    if (!enterprise?.toObject()) {
-      enterprise = await this.enterpriseModel.create({
-        name: 'Coderace',
-        document: '1234567890',
-      });
-    }
-
-    const userAdmin = await this.employeeModel.findOne({
-      email: 'murilo@admin.com',
-    });
-
-    if (!userAdmin?.toObject()) {
-      const passwordHash = await hash('123456', 6);
-      await this.employeeModel.create({
-        name: 'Murilo',
-        email: 'murilo@admin.com',
-        passwordHash,
-        role: Role.OWNER,
-        sector: 'Dono',
-        enterpriseId: enterprise.id,
-      });
-    }
-  }
-
   async findAll(currentUser: UserPayload): Promise<EmployeeDto[]> {
     const enterpriseId = await this.validatePermissionAndGetEnterpriseId(
       currentUser.sub,

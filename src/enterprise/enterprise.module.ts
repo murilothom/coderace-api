@@ -5,6 +5,7 @@ import { EnterpriseService } from './enterprise.service';
 import { AuthModule } from '../auth/auth.module';
 import { EnterpriseSchema } from './schemas/enterprise.schema';
 import { EmployeeSchema } from '../employee/schemas/employee.schema';
+import { ResultsSchema } from './schemas/results.schema';
 
 @Module({
   imports: [
@@ -13,11 +14,17 @@ import { EmployeeSchema } from '../employee/schemas/employee.schema';
         name: 'Enterprise',
         schema: EnterpriseSchema,
       },
-    ]),
-    MongooseModule.forFeature([
       {
         name: 'Employee',
         schema: EmployeeSchema,
+      },
+      {
+        name: 'Employee',
+        schema: EmployeeSchema,
+      },
+      {
+        name: 'Results',
+        schema: ResultsSchema,
       },
     ]),
     AuthModule,

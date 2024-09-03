@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateEnterpriseDto } from './dto/create-enterprise-dto';
 import { EnterpriseDto } from './dto/enterprise-dto';
@@ -33,6 +33,17 @@ export class EnterpriseController {
     @CurrentUser() currentUser: UserPayload,
   ): Promise<SectorDto[]> {
     return this.enterpriseService.getEnterpriseSectors(currentUser);
+  }
+
+  @Get('setores/:setor/insight')
+  @ApiResponse({
+    status: 200,
+  })
+  getSectorInsight(
+    @Param('setor') setor: string,
+    @CurrentUser() currentUser: UserPayload,
+  ): Promise<any> {
+    return this.enterpriseService.getSectorInsight(setor, currentUser);
   }
 
   @Public()

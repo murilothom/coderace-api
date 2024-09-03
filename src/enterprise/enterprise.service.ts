@@ -14,6 +14,7 @@ import { EnterpriseDto } from './dto/enterprise-dto';
 import { hash } from 'bcryptjs';
 import { Employee, Role } from '../employee/schemas/employee.schema';
 import { SectorDto } from './dto/sector-dto';
+import { Results } from './schemas/results.schema';
 
 @Injectable()
 export class EnterpriseService {
@@ -22,6 +23,8 @@ export class EnterpriseService {
     private readonly enterpriseModel: Model<Enterprise>,
     @InjectModel(Employee.name)
     private readonly employeeModel: Model<Employee>,
+    @InjectModel(Results.name)
+    private readonly resultsModel: Model<Results>,
   ) {}
 
   async getCurrentEnterprise(currentUser: UserPayload): Promise<EnterpriseDto> {
@@ -46,6 +49,28 @@ export class EnterpriseService {
       name: enterprise.name,
       document: enterprise.document,
     };
+  }
+
+  async getSectorInsight(
+    sector: string,
+    currentUser: UserPayload,
+  ): Promise<any> {
+    const { sub } = currentUser;
+
+    const employee = await this.employeeModel.findById(sub);
+
+    if (
+      !employee?.toObject() ||
+      (employee.role !== Role.ADMIN && employee.role !== Role.OWNER)
+    ) {
+      throw new ForbiddenException('Sem permissão.');
+    }
+
+    const results = await this.resultsModel.find({
+      sector,
+    });
+
+    return results.map((result) => result.toObject());
   }
 
   async getEnterpriseSectors(currentUser: UserPayload): Promise<SectorDto[]> {
